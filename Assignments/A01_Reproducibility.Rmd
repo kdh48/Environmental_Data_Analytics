@@ -1,6 +1,6 @@
 ---
 title: "Assignment 1: Reproducibility, Workflow, Version Control"
-author: "Student Name"
+author: "Kat Horan"
 output: pdf_document
 geometry: margin=2.54cm
 ---
@@ -30,29 +30,28 @@ The completed exercise is due on Thursday, 17 January, 2018 before class begins.
 ### Question
 Why are reproducible practices becoming the norm in data analytics?
 
-> Answer: 
+> Answer: Reproducible practices in data analytics allow for repeated testing to confirm results, recreating a method of analysis for different data sets, data sharing with collegues, and improves transparency and integrity. 
 
 ### Question
 What are your previous experiences with data analytics, R, and Git? Include both formal and informal training.
 
-> Answer: 
+> Answer: I have no previous experience with Git and my only prior experience with data analytics and R comes from John Poulsen's statistics class last semester.
 
 ### Question
 Are there any components of the course about which you feel confident?
 
-> Answer: 
+> Answer: I feel decently capable in R now, however, the learning method in Poulsen's course felt a lot like trial by fire at the beginning. I think he expected that many of us had at least a beginners experience in R so we aside from a very brief introduction, we jumped right into the labs without much hand holding. A lot of what I learned about R's capabilities came mostly from hounding Taylor at his office hours and scouring the internet. As such, I'm not sure I have the best/most efficient coding practices and am hoping this class will help me become more proficient and provide some more structured guidance along the way.
 
 ### Question
 Are there any components of the course about which you feel apprehensive?
 
-> Answer: 
+> Answer: Scraping data, cleaning data (I've done some, but I still feel like I'm at an amateur level), and navigating Github all seem a little intimidating.
 
-
-## 2) GitHub
+## 2) GitHub 
 
 ### Your Repository
 Provide a link below to your course repository in GitHub. Make sure you have pulled all recent changes from the course repository (https://github.com/KateriSalk/Environmental_Data_Analytics) and that you have updated your course README file. 
 
-> Answer: 
+> Answer: https://github.com/kdh48/Environmental_Data_Analytics/blob/master/README.md
 
 
