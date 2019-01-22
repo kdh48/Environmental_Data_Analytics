@@ -116,7 +116,7 @@ R functions are the major tool used in R. Functions can do virtually unlimited t
 
 ```{r}
 seq(1, 10)
-ten_sequence <- seq(1, 10)
+ten_sequence <- seq(1, 10); ten_sequence #semicolon to add "second line of code" in same line & run all together
 ten_sequence
 (ten_sequence <- seq(1, 10))
 
