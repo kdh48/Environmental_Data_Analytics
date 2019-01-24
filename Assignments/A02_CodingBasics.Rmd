@@ -1,6 +1,6 @@
 ---
 title: "Assignment 2: Coding Basics"
-author: "Student Name"
+author: "Kat Horan"
 output: pdf_document
 geometry: margin=2.54cm
 ---
@@ -36,7 +36,15 @@ The completed exercise is due on Thursday, 24 January, 2019 before class begins.
 4. Insert comments in your code to describe what you are doing.
 
 ```{r}
+# Problem 1: generating a sequence
+sequence1 <- seq(1, 100, 4); sequence1
 
+# Problem 2: finding the mean and median of this sequence
+mean(sequence1)
+median(sequence1)
+
+# Problem 3: determining if the mean is greater than the median
+mean(sequence1) > median(sequence1)
 ```
 
 ## Basics Day 2
@@ -51,20 +59,32 @@ The completed exercise is due on Thursday, 24 January, 2019 before class begins.
 
 ```{r}
 
+# Problem 5: creating a series of vectors and Probelm 6: label type of vector
+student_names <- c("Caroline", "Rachel", "Jake") # character vector
+grades <- c(75, 85, 95) # numeric vector
+passed <- c(TRUE, TRUE, TRUE) # logical vector
+
+#Problem 7: combine vectors into a data frame
+gradesdata <- data.frame(student_names,grades,passed) 
+names(gradesdata) <- c("Student","Grade","Passed"); View(gradesdata) 
 ```
 
 9. QUESTION: How is this data frame different from a matrix?
 
-> ANSWER: 
+> ANSWER: This data frame contains different types of data -- character, numeric, and logical -- and sets it up like a data table. Data in a matrix needs to be all the same type.
 
 10. Create a function with an if/else statement. Your function should determine whether a test score is a passing grade of 50 or above (TRUE or FALSE). You will need to choose either the `if` and `else` statements or the `ifelse` statement. The name of your function should be informative.
 
 11. Apply your function to the vector with test scores that you created in number 5. 
 
 ```{r}
-
+passedfail <- function(x){
+  ifelse(x<50, FALSE, TRUE)
+  
+}
+test <- passedfail(grades); test
 ```
 
 12. QUESTION: Which option of `if` and `else` vs. `ifelse` worked? Why?
 
-> ANSWER: 
+> ANSWER: The "if" and "else" function did not work because the condition had a length greater than 1. I opted for the "ifelse" function. 
