@@ -34,7 +34,7 @@ What is the output that results?
 If your working directory is not set to the folder you want, you have several options. The first is to directly code your working directory. You may do this by defining an absolute file path (below). What are the pitfalls of using an absolute file path?
 
 ```{r}
-# Absolute file path is commented out
+# Absolute file path is commented out so that when you try running the code and it's not the same comp it won't break
 #setwd("/Users/katerisalk/Documents/Duke/Courses/Environmental_Data_Analytics")
 ```
 
@@ -51,6 +51,7 @@ At the same time, you should also load your theme if you are doing any data visu
 ```{r}
 # Load package
 library(tidyverse)
+# library (rather than require) will tell you if there was an issue
 ```
 
 ### Import your datasets
@@ -59,19 +60,19 @@ Datasets can be imported into R. Good data practices dictate that raw data (from
 
 To read in a data file, you may specify a file path with an *absolute* or a *relative* file path. As above with your working directory, it is a better practice to use a relative directory. To navigate a relative file path, use `./` followed by the tab key to navigate  forward in the folder structure, and use `../` followed by the tab key to navigate back out of the folder structure. For example, this lesson is located in the "Lessons" folder, and we need to navigate into the "Data" folder. After clicking the correct folder, use `/` and press tab again to continue the process. 
 
-You may also import datasets from the Files tab, but this is not recommended since this is not reproducible.
+You may also import datasets from the Files tab, but this is not recommended since this is not reproducible. #looking at knitting directory under dropdown to put it in a different working directory
 
 Note: In the Knit menu in the Editor, you will need to specify whether your knit directory should be the document directory or the project directory. For class today, we will need the directory to be set to the project directory so that we can access relative file paths correctly. However, if you are knitting your document into a PDF, it may be desirable to set your knit directory back to the document directory so that the RMarkdown file and the PDF are saved in the same place.
 
 ```{r}
 # Absolute file path (not recommended)
-#read.csv("/Users/katerisalk/Documents/Duke/Courses/Environmental_Data_Analytics/Data/Raw/USGS_Site02085000_Flow_Raw.csv")
+# read.csv("/Users/katerisalk/Documents/Duke/Courses/Environmental_Data_Analytics/Data/Raw/USGS_Site02085000_Flow_Raw.csv")
 
 # Relative file path (friendly for users regardless of machine)
 USGS.flow.data <- read.csv("./Data/Raw/USGS_Site02085000_Flow_Raw.csv")
 
 # What happens if we don't assign a name to our imported dataset?
-#read.csv("./Data/Raw/USGS_Site02085000_Flow_Raw.csv")
+# read.csv("./Data/Raw/USGS_Site02085000_Flow_Raw.csv")
 
 # Another option is to choose with your browser
 # read.csv(file.choose())
@@ -107,7 +108,7 @@ length(USGS.flow.data)
 
 head(USGS.flow.data)
 head(USGS.flow.data, 10)
-tail(USGS.flow.data, 5)
+tail(USGS.flow.data, 5) #date collected?
 USGS.flow.data[30000:30005, c(3, 8, 14)]
 
 class(USGS.flow.data$datetime)
@@ -116,8 +117,12 @@ class(USGS.flow.data$gage.height.mean)
 
 summary(USGS.flow.data)
 summary(USGS.flow.data$discharge.mean)
+summary(USGS.flow.data$discharge.mean.approval)
 summary(USGS.flow.data$gage.height.mean)
 
+#Pay attention to what the class is, which can make a difference in what is imported with an n/a
+
+# Tibbles is a way to separate into smaller chunks and get it to act together as a data frame, benefit is that working with tibbles is faster than using the whole data frame. R for Data Science book has more info on it.
 ```
 
 What happened to blank cells in the spreadsheet when they were imported into R?

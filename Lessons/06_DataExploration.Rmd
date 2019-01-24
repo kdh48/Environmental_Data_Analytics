@@ -8,7 +8,6 @@ fig_width: 5
 fig_height: 2.5
 editor_options: 
   chunk_output_type: console
-
 ---
 
 ## LESSON OBJECTIVES
@@ -60,7 +59,7 @@ class(USGS.flow.data$datetime)
 
 R will often import dates as factors or characters rather than dates. To fix, this we need to tell R that it is looking at dates. We also need to specify the format the dates are in. By default, if you don't provide a format, R will attempt to use %Y-%m-%d or %Y/%m/%d as a default. Note: if you are working collaboratively in an international setting, using a year-month-day format in spreadsheets is the least ambiguous of date formats. Make sure to check whether month-day-year or day-month-year is used in an ambiguously formatted spreadsheet.
 
-Formatting of dates in R: 
+Formatting of dates in R:  Best way to do it is y/m/d
 
 %d  day as number (0-31)
 %m  month (00-12, can be e.g., 01 or 1)
@@ -73,6 +72,8 @@ Formatting of dates in R:
 
 In some cases when dates are provided as integers, you may need to provide an origin for your dates. Beware: the "origin" date for Excel (Windows), Excel (Mac), R, and MATLAB all have different origin dates. Google this if it comes up.
 
+R uses Jan. 1, 1970
+
 ```{r}
 help(as.Date)
 
@@ -82,9 +83,10 @@ help(as.Date)
 # (code must be uncommented)
 today <- Sys.Date()
 format(today, format = "%B")
-#format(today, format = "")
-#format(today, format = "")
-#format(today, format = "")
+format(today, format = "%m %d %y")
+format(today, format = "%Y")
+format(today, format = "%A")
+format(today, format = "%a")
 
 USGS.flow.data$datetime <- as.Date(USGS.flow.data$datetime, format = "%m/%d/%y") 
 ```
