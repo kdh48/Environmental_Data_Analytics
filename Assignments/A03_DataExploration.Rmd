@@ -1,6 +1,6 @@
 ---
 title: "Assignment 3: Data Exploration"
-author: "Student Name"
+author: "Kat Horan"
 output: pdf_document
 geometry: margin=2.54cm
 ---
@@ -28,15 +28,28 @@ The completed exercise is due on Thursday, 31 January, 2019 before class begins.
 ## 1) Set up your R session
 
 Check your working directory, load necessary packages (tidyverse), and upload the North Temperate Lakes long term monitoring dataset for the light, temperature, and oxygen data for three lakes (file name: NTL-LTER_Lake_ChemistryPhysics_Raw.csv). Type your code into the R chunk below.
-```{r}
 
+```{r}
+#set working directory
+#setwd("/Users/kathleenhoran/Desktop/Duke/Spring 2019/Env. Data Analytics/Env_Data_Analytics")
+getwd()
+
+#load packages
+library(tidyverse)
+
+#upload data
+NTL.LTER.ChemPhys <- read.csv("/Users/kathleenhoran/Desktop/Duke/Spring 2019/Env. Data Analytics/Env_Data_Analytics/Data/Raw/NTL-LTER_Lake_ChemistryPhysics_Raw.csv")
 ```
 
 ## 2) Learn about your system
 
 Read about your dataset in the NTL-LTER README file. What are three salient pieces of information you gained from reading this file?
 
-> ANSWER: 
+> ANSWER: 1.) The dataset contains data from studies on several lakes in the North Temperate Lakes District in Wisconsin, USA. Data were collected as part of the Long Term Ecological Research station established by the National Science Foundation.
+
+> ANSWER: 2.) Inorganic samples were collected at depths corresponding to 100%, 50%, 25%, 10%, 5%, and 1% of surface irradiance, as well as one sample from the hypolimnion. 
+
+> ANSWER: 3.) Files are named according to the following naming convention: `databasename_datatype_details_stage.format`
 
 ## 3) Obtain basic summaries of your data
 
@@ -49,28 +62,45 @@ Write R commands to display the following information:
 5. summary of lakename, depth, and temperature
 
 ```{r}
-# 1
+# 1 - Dimensions of the dataset
+dim(NTL.LTER.ChemPhys)
+length(NTL.LTER.ChemPhys)
 
-# 2
+# 2 - Class of the dataset
+class(NTL.LTER.ChemPhys)
 
-# 3
+# 3 - First 8 rows of the dataset
+head(NTL.LTER.ChemPhys, 8)
 
-# 4
+# 4 - Class of the variables
+class(NTL.LTER.ChemPhys$lakename) #factor
+class(NTL.LTER.ChemPhys$sampledate) #factor
+class(NTL.LTER.ChemPhys$depth) #numeric
+class(NTL.LTER.ChemPhys$temperature_C) #numeric
 
-# 5
+# 5 - Summary of variables
+summary(NTL.LTER.ChemPhys$lakename)
+summary(NTL.LTER.ChemPhys$depth)
+summary(NTL.LTER.ChemPhys$temperature_C)
 
 ```
 
 Change sampledate to class = date. After doing this, write an R command to display that the class of sammpledate is indeed date. Write another R command to show the first 10 rows of the date column. 
 
 ```{r}
+#Change class of sampledate to date
+NTL.LTER.ChemPhys$sampledate<- as.Date(NTL.LTER.ChemPhys$sampledate, format = "%m/%d/%y")
 
+#Confirm class has been changed
+class(NTL.LTER.ChemPhys$sampledate)
+
+#Show first 10 rows of the date column
+head(NTL.LTER.ChemPhys$sampledate, 10)
 ```
 
 Question: Do you want to remove NAs from this dataset? Why or why not?
 
-> ANSWER: 
-
+> ANSWER: I think this would depend on what we plan to be testing. Overall I would think that we would not want to remove the NAs from this dataset. Just because a sample is missing information for one of the variables does not mean that the rest of the information isn't valuable. If we are testing something relating to a specific variable that has N/A in it and we only want to consider the samples we have values for, then it may be helpful to set up a 2nd dataframe with the N/A's removed in that variable's column. For this data set, if we used the code discussed in class  (e.g. NTL.LTER.ChemPhys.complete <- na.omit(NTL.LTER.ChemPhys)) it would remove every row that has an "N/A" in the comments section which is not what we want.
 
 ## 4) Explore your data graphically
 
@@ -84,32 +114,48 @@ Write R commands to display graphs depicting:
 6. Boxplot of temperature based on depth, with depth divided into 0.25 m increments
 7. Scatterplot of temperature by depth
 
-```{r}
-# 1
+```{r, fig.width = 6, fig.height = 3}
 
-# 2
+# 1 Bar chart
+# Since we are focused on temp, I will remove the N/As from it first:
+NTL.LTER.ChemPhys.TempComplete <- subset(NTL.LTER.ChemPhys, !is.na(temperature_C))
 
-# 3
+ggplot(NTL.LTER.ChemPhys.TempComplete, aes(x = temperature_C, color = lakename)) +
+  geom_bar()
 
-# 4
+# 2 Histogram
+ggplot(NTL.LTER.ChemPhys.TempComplete) +
+  geom_histogram(aes(x = temperature_C))
 
-# 5
+# 3 Histogram, different bins
+ggplot(NTL.LTER.ChemPhys.TempComplete) +
+  geom_histogram(aes(x = temperature_C), bins = 15)
 
-# 6
+# 4 Frequency polygon
+ggplot(NTL.LTER.ChemPhys.TempComplete) +
+  geom_freqpoly(aes(x = temperature_C, color = lakename), bins = 50) 
 
-# 7 
+# 5 Boxplot of temp for each lake
+ggplot(NTL.LTER.ChemPhys.TempComplete) +
+  geom_boxplot(aes(x = lakename, y = temperature_C))
+
+# 6 Boxplot of temp based on depth, with depth divided into 0.25m increments
+ggplot(NTL.LTER.ChemPhys.TempComplete) +
+  geom_boxplot(aes(x = temperature_C, y = depth, group = cut_width(depth, .25)))
+
+# 7 Scatterplot of temp by depth
+ggplot(NTL.LTER.ChemPhys.TempComplete) +
+  geom_point(aes(x = temperature_C, y = depth))
 
 ```
-## 5) Form questions for further data analysis
+##5) Form questions for further data analysis
 
 What did you find out about your data from the basic summaries and graphs you made? Describe in 4-6 sentences.
 
-> ANSWER: 
+> ANSWER: From the summary and graphs made, I found that of the total of 38,614 samples from the data set, Peter Lake and Paul lake had the highest sample counts at 11,288 and 10,325 respectively. Tuesday Lake had the next highest sample count at 6107. The mean temperature recorded was 11.81 degrees celcius, with a median of 9.3. When looking at the relationship between temperature and depth, there seems to be a correlation that the temperature is lower when the depth is higher. 
 
 What are 3 further questions you might ask as you move forward with  analysis of this dataset?
 
-> ANSWER 1: 
-
-> ANSWER 2: 
-
-> ANSWER 3: 
+> ANSWER 1: Is there a relationship between dissolved oxygen and temperature?
+> ANSWER 2: Has the average temperature in each lake changed over time?
+> ANSWER 3: What is the relationship between dissolved oxygen and depth?
