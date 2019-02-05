@@ -7,6 +7,7 @@ geometry: margin=2.54cm
 editor_options: 
   chunk_output_type: console
 ---
+Data wrangling is manipulating the data to fit our needs, cleaning it up, organizing it, reformatting, etc. It's helpful to do the exploration first so then you get a better idea of how to wrangle it -- ex. we noticed that one lake was sampled a lot more in the exploration stage. This may mean we're interested in some statistics just within that lake, so during the wrangling we could separate that lake out.  
 
 ## LESSON OBJECTIVES
 1. Describe the usefulness of data wrangling and its place in the data pipeline
@@ -37,7 +38,7 @@ dim(NTL.phys.data)
 
 ## DATA WRANGLING
 
-Data wrangling takes data exploration one step further: it allows you to process data in ways that are useful for you. An important part of data wrangling is creating tidy datasets, with the following rules: 
+Data wrangling takes data exploration one step further: it allows you to process data in ways that are useful for you. An important part of data wrangling is creating tidy datasets, with the following rules:
 
 1. Each variable has its own column
 2. Each observation has its own row
@@ -73,43 +74,50 @@ class(NTL.phys.data$lakeid)
 class(NTL.phys.data$depth)
 
 # matrix filtering
-NTL.phys.data.surface1 <- NTL.phys.data[NTL.phys.data$depth == 0,]
+NTL.phys.data.surface1 <- NTL.phys.data[NTL.phys.data$depth == 0,] #after the comma is where you tell it which columns to use, with nothing after it means all the columns
 
-# dplyr filtering
+# dplyr filtering - tell it to use a datarame and then a conditional statement
 NTL.phys.data.surface2 <- filter(NTL.phys.data, depth == 0)
 NTL.phys.data.surface3 <- filter(NTL.phys.data, depth < 0.25)
 
 # Did the methods arrive at the same result?
-head(NTL.phys.data.surface1)
+head(NTL.phys.data.surface1) #matrix uses the row #s from original set
 dim(NTL.phys.data.surface1)
-head(NTL.phys.data.surface2)
+head(NTL.phys.data.surface2) #dplyer renames the rows to be in order
 dim(NTL.phys.data.surface2)
 head(NTL.phys.data.surface3)
 dim(NTL.phys.data.surface3)
 
 # Choose multiple conditions to filter
 summary(NTL.phys.data$lakename)
-NTL.phys.data.PeterPaul1 <- filter(NTL.phys.data, lakename == "Paul Lake" | lakename == "Peter Lake")
+NTL.phys.data.PeterPaul1 <- filter(NTL.phys.data, lakename == "Paul Lake" | lakename == "Peter Lake") #the | is the "or" operator. Need it to include.
+
 NTL.phys.data.PeterPaul2 <- filter(NTL.phys.data, lakename != "Central Long Lake" & 
                                      lakename != "Crampton Lake" & lakename != "East Long Lake" &
                                      lakename != "Hummingbird Lake" & lakename != "Tuesday Lake" &
-                                     lakename != "Ward Lake" & lakename != "West Long Lake")
+                                     lakename != "Ward Lake" & lakename != "West Long Lake") 
+#this removes the lakes, more helpful if you were just trying to remove one lake. Use & for removing items. 
+
 NTL.phys.data.PeterPaul3 <- filter(NTL.phys.data, lakename %in% c("Paul Lake", "Peter Lake"))
 
-# Choose a range of conditions of a numeric or integer variable
+# Choose a range of conditions of a numeric or integer variable. This is ignoring Leap Years
 summary(NTL.phys.data$daynum)
 NTL.phys.data.JunethruOctober1 <- filter(NTL.phys.data, daynum > 151 & daynum < 305)
-NTL.phys.data.JunethruOctober2 <- filter(NTL.phys.data, daynum > 151, daynum < 305)
+NTL.phys.data.JunethruOctober2 <- filter(NTL.phys.data, daynum > 151, daynum < 305) #comma operates as an & here
 NTL.phys.data.JunethruOctober3 <- filter(NTL.phys.data, daynum >= 152 & daynum <= 304)
 NTL.phys.data.JunethruOctober4 <- filter(NTL.phys.data, daynum %in% c(152:304))
 
 # Exercise: 
 # filter NTL.phys.data for the year 1999
+NTL.phys.data.1999 <- filter(NTL.phys.data, year4 == "1999") #as a factor or character you need to put it in quotes, but as an integer we wouldn't have to use the quote. 
+
 # what code do you need to use, based on the class of the variable?
+# as a factor or character you need to put it in quotes, but as an integer we wouldn't have to use the quote. 
 class(NTL.phys.data$year4)
 
 # Exercise: 
 # filter NTL.phys.data for Tuesday Lake from 1990 through 1999.
+NTL.phys.data.Tues90_99 <- filter(NTL.phys.data, year4 >= 1990 & year4 <= 1999 & lakename == "Tuesday Lake")
 
 
 ```
@@ -127,7 +135,9 @@ NTL.phys.data.depth.descending <- arrange(NTL.phys.data, desc(depth))
 
 # Exercise: 
 # Arrange NTL.phys.data by temperature, in descending order. 
+NTL.phys.data.temp.descending <- arrange(NTL.phys.data, desc(temperature_C))
 # Which dates, lakes, and depths have the highest temperatures?
+East Long Lake & Hummingbird Lake 
 
 
 ```
@@ -136,7 +146,8 @@ NTL.phys.data.depth.descending <- arrange(NTL.phys.data, desc(depth))
 Selecting allows us to choose certain columns (variables) in our dataset.
 
 ```{r}
-NTL.phys.data.temps <- select(NTL.phys.data, lakename, sampledate:temperature_C)
+NTL.phys.data.temps <- select(NTL.phys.data, lakename, sampledate:temperature_C) 
+#use commas and colons to use select, select is not as flexible as filter though. The colon is to be for the colums sampledate through temperature
 
 ```
 ### Mutate
@@ -146,6 +157,7 @@ Mutating allows us to add new columns that are functions of existing columns. Op
 ```{r}
 
 NTL.phys.data.temps <- mutate(NTL.phys.data.temps, temperature_F = (temperature_C*9/5) + 32)
+#this is creating a new column that is a function of a different column
 
 ```
 ### Pipes
@@ -169,6 +181,10 @@ Notice that we did not place the dataset name inside the wrangling function but 
 
 ```{r}
 write.csv(NTL.phys.data.PeterPaul1, row.names = FALSE, file = "./Data/Processed/NTL-LTER_Lake_ChemistryPhysics_PeterPaul_Processed.csv")
+
+#if we used row.names = TRUE it would include the row numbers as the first column. One dot before hand means going down one, two dots means going up
+
+#sometimes handy to comment out the #write.csv... so that you don't accidentally re-write a file if you don't mean to. 
 ```
 
 ## CLOSING DISCUSSION
