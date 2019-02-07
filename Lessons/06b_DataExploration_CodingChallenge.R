@@ -5,14 +5,17 @@
 ## Instructions listed in comments throughout the script.
 
 #### Setup ----
-setwd("/Users/katerisalk/Documents/Duke/Courses/Environmental_Data_Analytics")
+#setwd("/Users/kathleenhoran/Desktop/Duke/Spring 2019/Env. Data Analytics/Env_Data_Analytics")
+
+#put setwd as comment since not the same for everyone
 
 library("tidyverse")
 
-ecotox.neonic <- read.csv("/Data/Raw/ECOTOX_Neonicotinoids_Mortality_raw.csv")
+ecotox.neonic <- read.csv("./Data/Raw/ECOTOX_Neonicotinoids_Mortality_raw.csv")
+#insert period before data so pathway properly reads
 
 #### Basic Data Summaries ----
-head(ecotox.neonic,)
+head(ecotox.neonic)
 summary(ecotox.neonic%Chemical.Name)
 summary(ecotox.neonic%Pub..Year)
 

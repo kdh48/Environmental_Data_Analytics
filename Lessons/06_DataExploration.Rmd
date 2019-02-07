@@ -26,6 +26,7 @@ Why is data exploration our first step in analyzing a dataset? What information 
 getwd()
 
 # 2. Load packges
+#install.packages("tidyverse")
 library(tidyverse)
 
 # 3. Import datasets
@@ -99,8 +100,9 @@ USGS.flow.data$datetime <- format(USGS.flow.data$datetime, "%y%m%d")
 
 #
 create.early.dates <- (function(d) {
-       paste0(ifelse(d > 181231,"19","20"),d)
+       paste0(ifelse(d > 181231,"19","20"),d) 
        })
+#12-31-2018 was the latest date of access, so anything that R is saying is over that, such as 2020 means that it was from the 1900s
 #
 USGS.flow.data$datetime <- create.early.dates(USGS.flow.data$datetime)
 
@@ -119,12 +121,14 @@ summary(USGS.flow.data$gage.height.mean)
 ```
 Question: What types of research questions might make it favorable to remove NAs from a dataset, and what types of research questions might make it favorable to retain NAs in the dataset?
 
-> Answer: 
+> Answer: In some case you may want to remove N/As, but it's important to clarify when. Ex. some levels of WQ might be below detection, so not a true zero, but they put N/A. Sometimes you may have dataset where answers didn't apply but you don't want R to calculate a zero for it.
 
 ```{r}
 USGS.flow.data.complete <- na.omit(USGS.flow.data)
 dim(USGS.flow.data)
 dim(USGS.flow.data.complete)
+
+#By creating a new data set with the N/As removed, we are preserving the original dataset. Using na.omit removes the entire row. There is some way to do it by removing just the N/As in a column -- likely using datasetname$columnname. Can also use "complete.cases" which will query and show you where the N/As are. 
 
 mean(USGS.flow.data.complete$discharge.mean)
 sd(USGS.flow.data.complete$discharge.mean)
@@ -145,6 +149,7 @@ Visualize count data for categorical variables.
 ```{r, fig.height = 3, fig.width = 4}
 ggplot(USGS.flow.data.complete, aes(x = discharge.mean.approval)) +
   geom_bar()
+#A stands for approved, P stands for pending
 ```
 
 ### Histogram (function: geom_histogram)
@@ -155,14 +160,16 @@ Visualize distributions of values for continuous numerical variables. What is ha
 #
 ggplot(USGS.flow.data.complete) +
   geom_histogram(aes(x = discharge.mean))
-
+#ggplot didn't like automatic binwidth, adjusting below:
 #
 ggplot(USGS.flow.data.complete) +
   geom_histogram(aes(x = discharge.mean), binwidth = 10)
+#binwidth will assign it the number of units of whatever you're graphing
 
 #
 ggplot(USGS.flow.data.complete) +
   geom_histogram(aes(x = discharge.mean), bins = 20)
+#this will separate into x # of bins
 
 #
 ggplot(USGS.flow.data.complete, aes(x = discharge.mean)) +
@@ -186,11 +193,14 @@ ggplot(USGS.flow.data.complete) +
   geom_freqpoly(aes(x = gage.height.max), bins = 50, color = "red") +
   scale_x_continuous(limits = c(0, 10))
 
+#aes stands for aesthetics
+#we can see which height has the most frequency. needs to be in the same units.
 #
 ggplot(USGS.flow.data.complete) +
   geom_freqpoly(aes(x = gage.height.mean, color = gage.height.mean.approval), bins = 50) +
   scale_x_continuous(limits = c(0, 10)) +
   theme(legend.position = "top")
+#told ggplot to create a plot based on whether it is approved by placing the color = within the aesthetic parenthesis so it knew to colorcode, but we didn't assign it a color. To assign it a color it would have to be outside the aes() parenthesis
 
 ```
 ### Box-and-whisker plots (function: geom_boxplot)
@@ -211,14 +221,17 @@ An alternate option is a violin plot, which displays density distributions, some
 #
 ggplot(USGS.flow.data.complete) +
   geom_boxplot(aes(x = gage.height.mean.approval, y = gage.height.mean))
+#gage.height is an indication of how high the river is
 
 #
 ggplot(USGS.flow.data.complete) +
   geom_boxplot(aes(x = gage.height.mean, y = discharge.mean, group = cut_width(gage.height.mean, 1)))
+#higher gage height likely means higher discharge. helpful for relations that are not linear 
 
 #
 ggplot(USGS.flow.data.complete) +
   geom_violin(aes(x = gage.height.mean.approval, y = gage.height.mean), draw_quantiles = c(0.25, 0.5, 0.75))
+#the more # of samples at that value the wider the violin. The lines are the quantiles.
 ```
 
 Question: what are the pros and cons of each type of frequency graph (histogram, frequency polygon, box-and whisker, violin)?
