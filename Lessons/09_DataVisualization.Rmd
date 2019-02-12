@@ -24,6 +24,8 @@ PeterPaul.nutrients.gathered <- read.csv("./Data/Processed/NTL-LTER_Lake_Nutrien
 PeterPaul.chem.nutrients.summaries <- read.csv("./Data/Processed/NTL-LTER_Lake_Summaries_PeterPaul_Processed.csv")
 EPAair <- read.csv("./Data/Processed/EPAair_O3PM25_3sites1718_processed.csv")
 
+View(EPAair)
+
 EPAair$Date <- as.Date(EPAair$Date, format = "%Y-%m-%d")
 PeterPaul.chem.nutrients$sampledate <- as.Date(PeterPaul.chem.nutrients$sampledate, format = "%Y-%m-%d")
 
@@ -39,6 +41,10 @@ ggplot has only a few rules:
 * Aesthetics must be specified, most commonly x and y variables but including others. Aesthetics can be specified in the `ggplot()` function or in subsequent layers.
 * Additional layers must be specified to fill the plot. 
 
+ggplot(d, (aes()) + #dataframe (df) has to be specified at the top, aesthetics is optional here
+  geom_x(aes()) #aesthetics could go in this second layer
+  geom_y(df2, aes())
+
 ### Geoms
 
 Here are some commonly used layers for plotting in ggplot: 
@@ -49,7 +55,7 @@ Here are some commonly used layers for plotting in ggplot:
 * geom_boxplot
 * geom_violin
 * geom_dotplot
-* geom_point
+* geom_point -- this is for scatter polots
 * geom_errorbar
 * geom_smooth
 * geom_line
@@ -78,26 +84,30 @@ print(O3plot)
 
 # Fix this code
 O3plot2 <- ggplot(EPAair) +
-  geom_point(aes(x = Date, y = Ozone, color = "blue"))
+  geom_point(aes(x = Date, y = Ozone), color = "blue") #fixed, color needs to be outside the aesthetics
+print(O3plot2)
+
+O3plot2 <- ggplot(EPAair) +
+  geom_point(aes(x = Date, y = Ozone, color = Ozone)) #putting color in the aesthetics bracket without quotations it gives a gradient corresponding with the values, it's redundant though in this case
 print(O3plot2)
 
 # Add additional variables
 PMplot <- 
   ggplot(EPAair, aes(x = month, y = PM2.5, shape = as.factor(year), color = Site.Name)) +
-  geom_point()
+  geom_point() #currently year is an integer, so to treat it as a factor you have to specifiy it
 print(PMplot)
 
 # Separate plot with facets
 PMplot.faceted <-
   ggplot(EPAair, aes(x = month, y = PM2.5, shape = as.factor(year))) +
   geom_point() +
-  facet_wrap(vars(Site.Name), nrow = 3)
+  facet_wrap(vars(Site.Name), nrow = 3) #choose variable "Site.Name" and organize into 3 rows, without it would default into columns
 print(PMplot.faceted)
 
 PMplot.faceted2 <-
   ggplot(EPAair, aes(x = month, y = PM2.5)) +
   geom_point() +
-  facet_grid(Site.Name ~ year)
+  facet_grid(Site.Name ~ year) #tilda represent "by", so site.name by year. this way you can see the data across, also first spot is the rows, second is columns
 print(PMplot.faceted2)
 
 # Filter dataset within plot building
@@ -108,15 +118,25 @@ O3plot.Blackstone <-
 print(O3plot.Blackstone)
 
 # Exercise: build your own scatterplots of PeterPaul.chem.nutrients
+View(PeterPaul.chem.nutrients)
+class(PeterPaul.chem.nutrients$temperature_C)
 
 # 1. 
-# Plot surface temperatures by day of  year. 
+# Plot surface temperatures by day of  year.
 # Color your points by year, and facet by lake in two rows.
-
+PeterPaultemp.plot.faceted <-
+  ggplot(subset(PeterPaul.chem.nutrients, depth = 0), aes(x = daynum, y = temperature_C, color = year4)) +
+  geom_point() +
+  facet_wrap(vars(lakename), nrow = 2)
+print(PeterPaultemp.plot.faceted)
 
 #2. 
 # Plot temperature by date. Color your points by depth.
 # Change the size of your point to 0.5
+
+ggplot(PeterPaul.chem.nutrients, aes(x = sampledate, 
+      y = temperature_C, color = depth)) + 
+  geom_point(size = 0.5)
 
 
 ```
@@ -135,12 +155,12 @@ lightvsDOfixed <-
   geom_point() +
   xlim(0, 250) +
   ylim(0, 20)
-print(lightvsDOfixed)
+print(lightvsDOfixed) #low oxygen in depths where decomposition is happening, higher concentration of oxygen at the top, in part because photosynthesis is happening up there. 
 
 # Depth in the fields of limnology and oceanography is on a reverse scale
 tempvsdepth <- 
-  ggplot(PeterPaul.chem.nutrients, aes(x = temperature_C, y = depth)) +
-  #ggplot(PeterPaul.chem.nutrients, aes(x = temperature_C, y = depth, color = daynum)) +
+  #ggplot(PeterPaul.chem.nutrients, aes(x = temperature_C, y = depth)) +
+  ggplot(PeterPaul.chem.nutrients, aes(x = temperature_C, y = depth, color = daynum)) +
   geom_point() +
   scale_y_reverse()
 print(tempvsdepth)
