@@ -167,15 +167,22 @@ print(tempvsdepth)
 
 NvsP <-
   ggplot(PeterPaul.chem.nutrients, aes(x = tp_ug, y = tn_ug, color = depth)) +
-  geom_point() #+
-  #geom_smooth(method = lm) +
-  #geom_abline(aes(slope = 16, intercept = 0))
+  geom_point() +
+  geom_smooth(method = lm) +
+  geom_abline(aes(slope = 16, intercept = 0), lty = 2)
 print(NvsP)
+
+#lty means line type, has to be outside aesthetic
+#lines can be plotted along best fit (geom_smooth(method = lm)) while the abloine has a pre defined slope
 
 # Exercise: Plot relationships between air quality measurements
 
 # 1. 
 # Plot AQI values for ozone by PM2.5, colored by site. 
+ggplot(EPAair, aes(x = PM2.5, y = Ozone, color = Site.Name)) + 
+  geom_point() +
+  geom_smooth(method = lm)
+
 # Add a line of best fit for the linear regression of these variables.
 
   
@@ -190,15 +197,17 @@ PeterPaul.nutrient.summaries <- PeterPaul.nutrients.gathered %>%
   summarise(sd = sd(concentration), 
             mean = mean(concentration))
 
+# in previous examples only grouping by one, this creates a separate table to then base following plots on. 
+
 Nutrientplot <- 
   ggplot(PeterPaul.nutrients.gathered) +
-  geom_bar(aes(x = lakename, y = concentration, fill = as.factor(nutrient)), # why did we use fill?
-           position = "dodge", stat = "summary", fun.y = "mean")             # what's happening here?
+  geom_bar(aes(x = lakename, y = concentration, fill = as.factor(nutrient)), # why did we use fill? color will just give outline
+        position = "dodge", stat = "summary", fun.y = "mean")             # what's happening here? without dodge they are stacked on top of each other
 print(Nutrientplot)
 
 Nutrientplot2 <- 
   ggplot(PeterPaul.nutrient.summaries, aes(x = lakename, y = mean, fill = as.factor(nutrient))) + #
-  geom_bar(stat = "identity", position = "dodge") + # what does the stat command do?
+  geom_bar(stat = "identity", position = "dodge") +  # what does the stat command do? identity plots the summary of the cell since we already have computed the stats
   geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd), # how do we specify error bars?
                  position = "dodge")
 print(Nutrientplot2)
@@ -225,7 +234,7 @@ Nutrientplot5 <-
 print(Nutrientplot5)
 
 # Frequency polygons
-# Using a tidy dataset
+# Using a tidy dataset - tidy data sets are wide
 Nutrientplot6 <-
   ggplot(PeterPaul.chem.nutrients) +
   geom_freqpoly(aes(x = tn_ug), color = "black") +
@@ -235,7 +244,7 @@ Nutrientplot6 <-
   geom_freqpoly(aes(x = po4), color = "blue") 
 print(Nutrientplot6)
 
-# Using a gathered dataset
+# Using a gathered dataset - gathered data sets are skinny
 Nutrientplot7 <-   
   ggplot(PeterPaul.nutrients.gathered) +
   geom_freqpoly(aes(x = concentration, color = nutrient))
@@ -245,6 +254,27 @@ print(Nutrientplot7)
 
 # 1. 
 # Create a bar chart plus standard deviation error bars for PM2.5, divided by year. 
+
+#Plot AQI
+EPAair.PM25.summaries <- EPAair %>%
+  group_by(Site.Name, year) %>%
+  summarise(sd = (sd(PM2.5, na.rm = TRUE)), 
+            mean = (mean(PM2.5, na.rm = TRUE)))
+
+EPAairplot2 <- 
+  ggplot(EPAair.PM25.summaries, aes(x = as.factor(year), y = mean, fill = Site.Name)) + 
+  geom_bar(position = "dodge", stat = "identity") +
+geom_errorbar(aes(ymin = mean - sd, ymax = mean +sd), position = "dodge")
+print(EPAairplot2)
+
+
+
++ #
+  geom_bar(stat = "identity", position = "dodge") +  # what does the stat command do? identity plots the summary of the cell since we already have computed the stats
+  geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd), # how do we specify error bars?
+                 position = "dodge")
+print(EPAairplot2)
+
 # Create separate bars for each site. 
 
 # 2. 
