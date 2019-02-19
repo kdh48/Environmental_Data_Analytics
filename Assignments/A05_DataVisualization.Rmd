@@ -47,13 +47,15 @@ library(tidyverse)
 library(gridExtra)
 
 #2
+
+#Peter/Paul data sets
 PeterPaul.chem.nutrients <- read.csv("./Data/Processed/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv")
 
 PeterPaul.nutrients.gathered <- read.csv("./Data/Processed/NTL-LTER_Lake_Nutrients_PeterPaulGathered_Processed.csv")
 PeterPaul.nutrients.gathered$sampledate <- as.Date(PeterPaul.nutrients.gathered$sampledate, format = "%Y-%m-%d")
 #PeterPaul.nutrients.gathered$sampledate <- format(PeterPaul.nutrients.gathered$sampledate, "%m/%d/%Y")
 
-#USGS Data
+#USGS data set
 USGS.flow.data <- read.csv("./Data/Raw/USGS_Site02085000_Flow_Raw.csv")
 colnames(USGS.flow.data) <- c("agency_cd", "site_no", "datetime", 
                               "discharge.max", "discharge.max.approval", 
@@ -70,9 +72,8 @@ create.early.dates <- (function(d) {
 USGS.flow.data$datetime <- create.early.dates(USGS.flow.data$datetime)
 USGS.flow.data$datetime <- as.Date(USGS.flow.data$datetime, format = "%Y%m%d")
 
-#Ecotox
+#Ecotox data set
 Ecotox.neo.mort.raw <- read.csv("./Data/Raw/ECOTOX_Neonicotinoids_Mortality_raw.csv")
-
 ```
 ## Define your theme
 3. Build a theme and set it as your default theme.
@@ -142,21 +143,31 @@ discharge.line.plot <-
 discharge.smooth.plot <- 
  ggplot(USGS.flow.data, aes(x = datetime, y = discharge.max)) +
    geom_point(color = "#1d91c0") +
-   geom_smooth(method = "loess", color = "black") + 
+   geom_smooth(color = "black") + 
    labs(x = "Date", y = "Discharge, ft^3/s")
-print(discharge.smooth.plot)
 
 grid.arrange(discharge.line.plot, discharge.smooth.plot)
 
 ```
 Question: How do these two types of lines affect your interpretation of the data?
 
-> Answer: Geom_line connects each of the points sequentially, while geom_smooth 
+> Answer: Geom_line connects each of the points sequentially, while geom_smooth connects across the points. The geom_line would be helpful to see changes between values, geom_smooth seems to be better for general trends across the data.
 
 7. [ECOTOX Neonicotinoids] Plot the concentration, divided by chemical name. Choose a geom that accurately portrays the distribution of data points.
 
 ```{r}
 #7 
+summary(Ecotox.neo.mort.raw)
+Ecotox.plot <-
+  ggplot(Ecotox.neo.mort.raw, Conc. aes(x = lakename, y = concentration, color = nutrient)) +
+  geom_boxplot() +
+# place your additional edits here
+  scale_y_continuous(expand = c(0, 0)) +
+  #scale_color_brewer(palette = "YlGnBu") +
+  scale_color_manual(values = c("#7fcdbb", "#41b6c4", "#1d91c0", "#225ea8", "#0c2c84")) + #this uses same palette from the brewer YlGnBu but just took the darkest colors from it. Hex codes on website.
+  #scale_color_viridis(discrete = TRUE) +
+  theme(legend.position = "right")
+print(Nutrientplot)
 
 ```
 
