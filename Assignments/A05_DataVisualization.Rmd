@@ -1,6 +1,6 @@
 ---
 title: "Assignment 5: Data Visualization"
-author: "Student Name"
+author: "Kat Horan"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -33,16 +33,57 @@ The completed exercise is due on Tuesday, 19 February, 2019 before class begins.
 2. Make sure R is reading dates as date format, not something else (hint: remember that dates were an issue for the USGS gauge data).
 
 ```{r}
-#1
+#1 Set working directory
+# setwd("/Users/kathleenhoran/Desktop/Duke/Spring 2019/Env. Data Analytics/Env_Data_Analytics")
+
+# Load package
+library(lubridate)
+library(pander)
+library(ggplot2)
+library(viridis)
+library(RColorBrewer)
+library(colormap)
+library(tidyverse)
+library(gridExtra)
 
 #2
+PeterPaul.chem.nutrients <- read.csv("./Data/Processed/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv")
+
+PeterPaul.nutrients.gathered <- read.csv("./Data/Processed/NTL-LTER_Lake_Nutrients_PeterPaulGathered_Processed.csv")
+PeterPaul.nutrients.gathered$sampledate <- as.Date(PeterPaul.nutrients.gathered$sampledate, format = "%Y-%m-%d")
+#PeterPaul.nutrients.gathered$sampledate <- format(PeterPaul.nutrients.gathered$sampledate, "%m/%d/%Y")
+
+#USGS Data
+USGS.flow.data <- read.csv("./Data/Raw/USGS_Site02085000_Flow_Raw.csv")
+colnames(USGS.flow.data) <- c("agency_cd", "site_no", "datetime", 
+                              "discharge.max", "discharge.max.approval", 
+                              "discharge.min", "discharge.min.approval", 
+                              "discharge.mean", "discharge.mean.approval", 
+                              "gage.height.max", "gage.height.max.approval", 
+                              "gage.height.min", "gage.height.min.approval", 
+                              "gage.height.mean", "gage.height.mean.approval")
+USGS.flow.data$datetime <- as.Date(USGS.flow.data$datetime, format = "%m/%d/%y")
+USGS.flow.data$datetime <- format(USGS.flow.data$datetime, "%y%m%d")
+create.early.dates <- (function(d) {
+       paste0(ifelse(d > 181231,"19","20"),d) 
+       })
+USGS.flow.data$datetime <- create.early.dates(USGS.flow.data$datetime)
+USGS.flow.data$datetime <- as.Date(USGS.flow.data$datetime, format = "%Y%m%d")
+
+#Ecotox
+Ecotox.neo.mort.raw <- read.csv("./Data/Raw/ECOTOX_Neonicotinoids_Mortality_raw.csv")
+
 ```
 ## Define your theme
 3. Build a theme and set it as your default theme.
 
 ```{r}
-#3
+#3 
+mytheme <- theme_classic(base_size = 14) +
+  theme(axis.text = element_text(color = "black"),
+        legend.position = "top")
 
+theme_set(mytheme)
 ```
 
 ## Create graphs
@@ -54,7 +95,15 @@ Hint: a good way to build graphs is to make them ugly first and then create more
 
 ```{r}
 #4
-
+ggplot(PeterPaul.chem.nutrients, aes(x = tp_ug, 
+    y = po4, color = lakename)) + 
+    scale_color_manual(values=c("#c994c7", "#225ea8")) +
+    geom_point(alpha = 0.8, size = 3) +
+    xlim(0, 150) +
+    ylim(0, 50) +
+    geom_smooth(method = lm, color = "black") +
+    labs(x = "Total Phosphorus, µg/L", y = "Phosphate", fill = "lakename",    
+    color = "Lake Name:")
 ```
 
 
@@ -62,7 +111,21 @@ Hint: a good way to build graphs is to make them ugly first and then create more
 
 ```{r}
 #5
+levels(PeterPaul.nutrients.gathered$nutrient) <- c("Ammonium", "Nitrate", "Phosphate", "Total Nitrogen", "Total Phosphorus")
 
+PeterLake.plot.faceted <-
+  ggplot(PeterPaul.nutrients.gathered, lakename = Peter, 
+          aes(x = sampledate, y = concentration, color = depth)) +
+          geom_point() +
+          facet_wrap(~ nutrient, nrow = 5) +
+          labs(x = "Date of Sample", y = "Concentration, µg/L", 
+              fill = "Depth",    
+          color = "Depth") +
+          scale_x_date(limits = as.Date(c("1991/01/01", "2016/12/31")), 
+          date_breaks = "5 year", date_labels = "%b %Y") + 
+          scale_color_viridis(option = "magma", direction = -1) +
+          theme(axis.text.x = element_text(angle = 45,  hjust = 1))
+print(PeterLake.plot.faceted)
 ```
 
 
@@ -70,11 +133,25 @@ Hint: a good way to build graphs is to make them ugly first and then create more
 
 ```{r}
 #6
+discharge.line.plot <- 
+  ggplot(USGS.flow.data, aes(x = datetime, y = discharge.max)) +
+   geom_line() +
+   geom_point(color = "#1d91c0") +
+   labs(x = "Date", y = "Discharge, ft^3/s" )
+
+discharge.smooth.plot <- 
+ ggplot(USGS.flow.data, aes(x = datetime, y = discharge.max)) +
+   geom_point(color = "#1d91c0") +
+   geom_smooth(method = "loess", color = "black") + 
+   labs(x = "Date", y = "Discharge, ft^3/s")
+print(discharge.smooth.plot)
+
+grid.arrange(discharge.line.plot, discharge.smooth.plot)
 
 ```
 Question: How do these two types of lines affect your interpretation of the data?
 
-> Answer:
+> Answer: Geom_line connects each of the points sequentially, while geom_smooth 
 
 7. [ECOTOX Neonicotinoids] Plot the concentration, divided by chemical name. Choose a geom that accurately portrays the distribution of data points.
 
