@@ -51,7 +51,7 @@ print(O3plot3) #very lightly lined axis and grid lines
 
 O3plot4 <- ggplot(EPAair) +
   geom_point(aes(x = Date, y = Ozone)) +
-  theme_classic()
+  theme_classic()d
 print(O3plot4) #Kateri's favorite
 ```
 
@@ -117,9 +117,9 @@ There are several color palettes that are designed to be more effective than pal
 Perception is key! Choose palettes that are visually pleasing and will communicate what you are hoping your audience to perceive. Hint: base R palettes are not ideal.
 
 ```{r, warning = FALSE}
-install.packages("viridis")
-install.packages("RColorBrewer")
-install.packages("colormap")
+#install.packages("viridis")
+#install.packages("RColorBrewer")
+#install.packages("colormap")
 library(viridis)
 library(RColorBrewer)
 library(colormap)
@@ -177,6 +177,8 @@ PMplot.faceted <-
   #theme(strip.background = element_rect(fill = "black"), strip.text = element_text(color = "white"))
   ylab(expression("PM 2.5 AQI Value")) 
 print(PMplot.faceted)
+
+
 
 ```
 

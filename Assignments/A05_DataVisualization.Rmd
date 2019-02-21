@@ -49,11 +49,13 @@ library(gridExtra)
 #2
 
 #Peter/Paul data sets
-PeterPaul.chem.nutrients <- read.csv("./Data/Processed/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv")
+PeterPaul.chem.nutrients <-
+  read.csv("./Data/Processed/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv")
 
-PeterPaul.nutrients.gathered <- read.csv("./Data/Processed/NTL-LTER_Lake_Nutrients_PeterPaulGathered_Processed.csv")
-PeterPaul.nutrients.gathered$sampledate <- as.Date(PeterPaul.nutrients.gathered$sampledate, format = "%Y-%m-%d")
-#PeterPaul.nutrients.gathered$sampledate <- format(PeterPaul.nutrients.gathered$sampledate, "%m/%d/%Y")
+PeterPaul.nutrients.gathered <- 
+  read.csv("./Data/Processed/NTL-LTER_Lake_Nutrients_PeterPaulGathered_Processed.csv")
+PeterPaul.nutrients.gathered$sampledate <- 
+  as.Date(PeterPaul.nutrients.gathered$sampledate, format = "%Y-%m-%d")
 
 #USGS data set
 USGS.flow.data <- read.csv("./Data/Raw/USGS_Site02085000_Flow_Raw.csv")
@@ -95,7 +97,7 @@ Hint: a good way to build graphs is to make them ugly first and then create more
 4. [NTL-LTER] Plot total phosphorus by phosphate, with separate aesthetics for Peter and Paul lakes. Add a line of best fit and color it black.
 
 ```{r}
-#4
+#4 Phosphate to Total Phosphorus in Peter & Paul Lakes
 ggplot(PeterPaul.chem.nutrients, aes(x = tp_ug, 
     y = po4, color = lakename)) + 
     scale_color_manual(values=c("#c994c7", "#225ea8")) +
@@ -110,16 +112,17 @@ ggplot(PeterPaul.chem.nutrients, aes(x = tp_ug,
 
 5. [NTL-LTER] Plot nutrients by date for Peter Lake, with separate colors for each depth. Facet your graph by the nutrient type.
 
-```{r}
-#5
-levels(PeterPaul.nutrients.gathered$nutrient) <- c("Ammonium", "Nitrate", "Phosphate", "Total Nitrogen", "Total Phosphorus")
+```{r, fig.height=8}
+#5 Peter Lake Nutrients
+levels(PeterPaul.nutrients.gathered$nutrient) <- 
+  c("Ammonium", "Nitrate", "Phosphate", "Total Nitrogen", "Total Phosphorus")
 
 PeterLake.plot.faceted <-
   ggplot(PeterPaul.nutrients.gathered, lakename = Peter, 
           aes(x = sampledate, y = concentration, color = depth)) +
           geom_point() +
           facet_wrap(~ nutrient, nrow = 5) +
-          labs(x = "Date of Sample", y = "Concentration, µg/L", 
+          labs(x = "Date of Sample", y = "Concentration", 
               fill = "Depth",    
           color = "Depth") +
           scale_x_date(limits = as.Date(c("1991/01/01", "2016/12/31")), 
@@ -133,7 +136,7 @@ print(PeterLake.plot.faceted)
 6. [USGS gauge] Plot discharge by date. Create two plots, one with the points connected with geom_line and one with the points connected with geom_smooth (hint: do not use method = "lm"). Place these graphs on the same plot (hint: ggarrange or something similar)
 
 ```{r}
-#6
+#6 Discharge Data Plots
 discharge.line.plot <- 
   ggplot(USGS.flow.data, aes(x = datetime, y = discharge.max)) +
    geom_line() +
@@ -156,18 +159,17 @@ Question: How do these two types of lines affect your interpretation of the data
 7. [ECOTOX Neonicotinoids] Plot the concentration, divided by chemical name. Choose a geom that accurately portrays the distribution of data points.
 
 ```{r}
-#7 
-summary(Ecotox.neo.mort.raw)
+#7 Ecotox Plot
 Ecotox.plot <-
-  ggplot(Ecotox.neo.mort.raw, Conc. aes(x = lakename, y = concentration, color = nutrient)) +
-  geom_boxplot() +
-# place your additional edits here
+  ggplot(Ecotox.neo.mort.raw, Conc..Units..Std. = "AI mg/L", 
+         aes(x = Chemical.Name, y = Conc..Mean..Std., color = Chemical.Name)) +
+  geom_point() +
   scale_y_continuous(expand = c(0, 0)) +
-  #scale_color_brewer(palette = "YlGnBu") +
-  scale_color_manual(values = c("#7fcdbb", "#41b6c4", "#1d91c0", "#225ea8", "#0c2c84")) + #this uses same palette from the brewer YlGnBu but just took the darkest colors from it. Hex codes on website.
-  #scale_color_viridis(discrete = TRUE) +
-  theme(legend.position = "right")
-print(Nutrientplot)
+  scale_color_viridis(discrete = TRUE) +
+  labs(x = "Chemical Name", y = "Concentration", 
+          color = "Chemical Name") +
+  theme(legend.position = "right", axis.text.x = element_text(angle = 45,  hjust = 1))
+print(Ecotox.plot)
 
 ```
 

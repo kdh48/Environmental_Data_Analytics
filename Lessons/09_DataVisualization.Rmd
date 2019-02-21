@@ -125,7 +125,7 @@ class(PeterPaul.chem.nutrients$temperature_C)
 # Plot surface temperatures by day of  year.
 # Color your points by year, and facet by lake in two rows.
 PeterPaultemp.plot.faceted <-
-  ggplot(subset(PeterPaul.chem.nutrients, depth = 0), aes(x = daynum, y = temperature_C, color = year4)) +
+  ggplot(subset(PeterPaul.nutrients.gathered, depth = 0), aes(x = daynum, y = temperature_C, color = year4)) +
   geom_point() +
   facet_wrap(vars(lakename), nrow = 2)
 print(PeterPaultemp.plot.faceted)
