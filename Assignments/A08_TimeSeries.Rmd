@@ -1,6 +1,6 @@
 ---
 title: "Assignment 8: Time Series Analysis"
-author: "Student Name"
+author: "Kat Horan"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -38,7 +38,15 @@ Question: Did you do this?
 2. Set up your session. Upload the EPA air quality raw dataset for PM2.5 in 2018, and the processed NTL-LTER dataset for nutrients in Peter and Paul lakes. Build a ggplot theme and set it as your default theme. Make sure date variables are set to a date format.
 
 ```{r}
+#setwd("/Users/kathleenhoran/Desktop/Duke/Spring 2019/Env. Data Analytics/Env_Data_Analytics")
+library(trend)
+library(ggplot2)
+library(viridis)
+library(RColorBrewer)
+library(tidyverse)
 
+EPAair_PM25_NC18_raw <-
+  read.csv("./Data/Raw/EPAair_PM25_NC2018_raw.csv")
 ```
 
 

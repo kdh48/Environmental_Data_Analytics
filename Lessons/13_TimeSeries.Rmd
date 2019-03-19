@@ -18,7 +18,6 @@ editor_options:
 
 ```{r, message = FALSE, warning = FALSE}
 getwd()
-library(tidyverse)
 #install.packages("lubridate")
 library(lubridate)
 #install.packages("nlme")
@@ -27,6 +26,7 @@ library(nlme)
 library(lsmeans)
 #install.packages("multcompView")
 library(multcompView)
+library(tidyverse)
 
 PeterPaul.chem <- read.csv("./Data/Processed/NTL-LTER_Lake_ChemistryPhysics_PeterPaul_Processed.csv")
 
