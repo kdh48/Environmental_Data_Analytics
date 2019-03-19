@@ -91,7 +91,7 @@ myMap = mapview(EPAair_PM_avg,
 #Show the map
 myMap
 
-#Save the map (if you want)
+#Save the map (if you want, and if "phantomJS" is installed)
 #mapshot(myMap, file='EPA_SiteMap.png')  #Save to a PNG file
 #mapshot(myMap, file='EPA_SiteMap.html') #Save to an HTML file
 ```
@@ -169,9 +169,12 @@ plot(EPAair_PM_avg_sf)
 #Plot everything -- with MapView
 mapview(EPAair_PM_avg_sf)
 
+#Plot a single variable in mapviwe
+mapview(EPAair_PM_avg_sf['meanPM'])
+
 #With geometries now available in a column, we can use ggplot with the geom_sf object
 ggplot() + 
-  geom_sf(data=EPAair_PM_avg_sf, aes(color=meanPM),size=4)
+  geom_sf(data=EPAair_PM_avg_sf, aes(color=meanPM), size=4)
 
 ```
 
@@ -244,6 +247,7 @@ EPAair_PM_avg_sf_UTM <- st_transform(EPAair_PM_avg_sf, crs=26917)
 DA_UTM_buffer <- EPAair_PM_avg_sf_UTM %>% 
   filter(Site.Name == 'Durham Armory') %>%     # Filter for the Durham Armory Site
   st_buffer(2000)                              # Buffer 2000 meters
+
 mapView(DA_UTM_buffer)                         # View the results
 ```
 
@@ -308,7 +312,7 @@ mapView(counties_sf)
 ```
 
 
-> _Now you try_: Read in the NC 8-Digit HUC dataset: './Data/Spatial/8Digit_HUC_Subbasins.shp'. What CRS does this dataset use? Is it the same as the counties dataset? What columns are included in this dataset?
+> _Now you try_: Read in the NC 8-Digit HUC dataset: './Data/Spatial/huc_250k_nc.shp'. What CRS does this dataset use? Is it the same as the counties dataset? What columns are included in this dataset?
 
 ```{r read HUCs shapefile}
 #Read the shapefile into an sf dataframe named "huc8_sf"
@@ -349,7 +353,7 @@ state_sf2 <- st_union(counties_sf)
 mapview(state_sf2)
 ```
 
-> Now you try it: Aggregate the HUC data on the SUB attribute, computing the sum of the "area" field and view the result. 
+> Now you try it: Aggregate the HUC data on the SUB attribute, computing the sum of the "AREA" field and view the result. 
 
 ```{r Aggregate the HUC data on an attribute, saving as huc2_sf}
 huc2_sf <- 
@@ -451,14 +455,13 @@ huc2_UTM_nc <- st_intersection(huc2_utm,state_sf_utm)
 mapview(huc2_UTM_nc)
 ```
 
-> Exercise: Try subsetting the HUc2 dataset for SUB = 0302, then clipping counties with that subset.
+> Exercise: Try subsetting the huc2_UTM dataset for SUB = 0302, then clipping counties with that subset.
 
-```{r EXERCISE: Clipping}
-huc0304 <- 
+```{r EXERCISE: Clip the counties dataset with the border of HUC 0302}
+huc0302_counties <- 
   
-  
-mapview(huc0304)
-
+#Map the product, showing values by land area
+mapview(huc0302_counties['ALAND'])
 ```
 
 
@@ -467,7 +470,7 @@ To add more attributes to our spatial features, we can merge records just as we 
 
 ```{r Join demographic data to county features}
 #Read in the demographic data
-demog_df <- read.csv('./data/spatial/NC_Demography.csv') %>% 
+demog_df <- read.csv('./Data/Spatial/NC_Demography.csv') %>% 
   mutate(FIPS = as.factor(FIPS))                                 #Convert the FIPS variable to a factor
 
 #Join the two datasets using "GEOID" from the left dataset and "FIPS" from the right
@@ -562,15 +565,6 @@ mapView(counties_sf[resultMask,])
 > Questions: how might we use the `st_buffer` function to show all counties within 30km of the site?
 
 ```{r Select counties within a 30 km area from the site}
-site_30km <- st_buffer(theSite_sfc_transformed,30000)
-mapview(site_30km)
-
-resultMask_30km <- st_intersects(counties_sf_utm, 
-                                 site_30km, 
-                                 sparse=FALSE)
-
-selCounties_30km <- counties_sf_utm[resultMask_30km,]
-mapview(selCounties_30km)
 
                             
 ```
