@@ -53,6 +53,7 @@ When we combine geometries with attributes we get a **spatially enabled datafram
 ```{r Map the 2017 EPA Ozone Data}
 #Import the tidyverse libary 
 library(tidyverse, quietly = TRUE)
+library(ggplot2)
 
 #Read the data 2017 Ozone data
 EPAair_PM25_NC2018_raw <- read.csv("./Data/Raw/EPAair_PM25_NC2018_raw.csv")
@@ -191,7 +192,7 @@ Durham_buffer <- EPAair_PM_avg_sf %>%
   st_buffer(0.1)
 
 #View the result
-mapView(Durham_buffer)
+mapview(Durham_buffer)
 ```
 
 In running the above, you get an warning and the shape looks elliptical, not circular. What's up? Well, it's time to chat about coordinate reference systems...
@@ -316,15 +317,26 @@ mapView(counties_sf)
 
 ```{r read HUCs shapefile}
 #Read the shapefile into an sf dataframe named "huc8_sf"
-huc8_sf <-   
+huc8_sf <- st_read('./Data/Spatial/huc_250k_nc.shp')
 
 #Check the CRS
-
+st_crs(huc8_sf)
 
 #Exaimine the column names
+names(huc8_sf)
 
+plot(huc8_sf$SUB)
 
 #View the data as a map
+plot(huc8_sf['SUB'],
+     graticule = st_crs(4326), #Add a graticule #4326 is mercator projection
+     axes=TRUE)
+
+plot(huc8_sf['SUB'],
+     graticule = st_crs(huc8_sf), #Switching to data name makes the same projection
+     axes=TRUE)
+
+mapView(huc8_sf)
 
 ```
 
@@ -332,9 +344,10 @@ huc8_sf <-
 
 ```{r Select the Upper Neuse HUC 8}
 #Read the shapefile into an sf dataframe
-upperNeuse_sf <-  
+upperNeuse_sf <- st_read('./Data/Spatial/huc_250k_nc.shp') %>%
+  filter(HUC_NAME == 'Upper Neuse')
   
-
+mapview(upperNeuse_sf)
 ```
 
 
@@ -342,7 +355,7 @@ upperNeuse_sf <-
 ```{r Dissolve all counties into a single feature}
 #Aggregate the data using group_by and summarize, just as you would a non-spatial dataframe
 state_sf <- counties_sf %>% 
-  group_by('STATEFP') %>% 
+  group_by(STATEFP) %>% 
   summarize(ALAND = sum(ALAND))
 
 #View the data
@@ -356,12 +369,12 @@ mapview(state_sf2)
 > Now you try it: Aggregate the HUC data on the SUB attribute, computing the sum of the "AREA" field and view the result. 
 
 ```{r Aggregate the HUC data on an attribute, saving as huc2_sf}
-huc2_sf <- 
-  
+huc2_sf <- huc8_sf %>%
+  group_by(SUB) %>%
+  summarize(AREA = sum(AREA))
   
 mapview(huc2_sf)
 ```
-
 
 
 ## Transforming coordinate reference systems of datasets
@@ -414,13 +427,12 @@ ggplot() +
 Tip: See http://leaflet-extras.github.io/leaflet-providers/ for other basemaps
 ```{r Visualizing multiple datasets with leaflet}
 leaflet() %>% 
-  addProviderTiles(providers$Esri.WorldShadedRelief) %>%  
+  addProviderTiles(providers$Esri.NatGeoWorldMap) %>%  #(providers$Esri.WorldShadedRelief)
   addPolygons(data = counties_WGS84, color = "orange", weight = 1, smoothFactor = 0.5,   
               opacity = 1.0, fillOpacity = 0.5,
               fillColor = ~colorQuantile("YlGnBu", ALAND)(ALAND)) %>% 
   addPolygons(data = huc2_WGS84, color=NA, weight = 2) %>% 
   addMarkers(data=EPAair_wgs84,popup = ~as.character(`Site.Name`))
-
 ```
 
 ### leaflet - linked and synced plots
@@ -446,8 +458,6 @@ sync(m1,m2)
 ```
 
 
-
-
 ## Clipping and intersecting data
 ```{r}
 #Clip the HUC2 data set by the NC State boundary dataset
@@ -458,12 +468,15 @@ mapview(huc2_UTM_nc)
 > Exercise: Try subsetting the huc2_UTM dataset for SUB = 0302, then clipping counties with that subset.
 
 ```{r EXERCISE: Clip the counties dataset with the border of HUC 0302}
-huc0302_counties <- 
+huc0302_counties <- huc2_utm %>% 
+  filter(SUB == '0302')
+
+huc0302_counties_clip <- st_intersection(counties_sf_utm,huc0302_counties)
+mapview(huc0302_counties_clip)
   
 #Map the product, showing values by land area
-mapview(huc0302_counties['ALAND'])
+mapview(huc0302_counties_clip['ALAND'])
 ```
-
 
 ## Attribute joins with `merge`
 To add more attributes to our spatial features, we can merge records just as we do with non-spatial dataframes, i.e. with the `merge` command. Here we will read in a table of county census data an join them to our counties_sf data set.
@@ -471,7 +484,7 @@ To add more attributes to our spatial features, we can merge records just as we 
 ```{r Join demographic data to county features}
 #Read in the demographic data
 demog_df <- read.csv('./Data/Spatial/NC_Demography.csv') %>% 
-  mutate(FIPS = as.factor(FIPS))                                 #Convert the FIPS variable to a factor
+  mutate(FIPS = as.factor(FIPS))                      #Convert the FIPS variable to a factor
 
 #Join the two datasets using "GEOID" from the left dataset and "FIPS" from the right
 counties_sf_utm_join <- counties_sf_utm %>% 
@@ -481,6 +494,8 @@ counties_sf_utm_join <- counties_sf_utm %>%
 dim(counties_sf_utm)
 dim(demog_df)
 dim(counties_sf_utm_join)
+
+#Early up in document st as sf? Might be on hmwk
 
 #Plot counties with a new variable
 ggplot() + 
