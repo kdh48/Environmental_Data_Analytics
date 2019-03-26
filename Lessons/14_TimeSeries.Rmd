@@ -95,7 +95,7 @@ mk.test(Peter.nutrients.surface$tp_ug[35:132])
 
 # Is there a second change point?
 pettitt.test(Peter.nutrients.surface$tp_ug[35:132])
-#35 + 79
+# 35 + 79
 
 # Run another Mann-Kendall for the second change point
 mk.test(Peter.nutrients.surface$tp_ug[35:113])

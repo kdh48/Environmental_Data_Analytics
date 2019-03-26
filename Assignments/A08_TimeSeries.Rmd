@@ -97,6 +97,14 @@ ggplot(EPAair_PM25_NC18_raw, aes(x = Date, y = Daily.Mean.PM2.5.Concentration)) 
 ```{r}
 PM2.5 = PM2.5[order(PM2.5[,'Date'],-PM2.5[,'Site.ID']),]
 PM2.5 = PM2.5[!duplicated(PM2.5$Date),]
+
+PM2.5 <- EPAair_PM25_NC18_raw$Daily.Mean.PM2.5.Concentration
+
+PM2.5 = EPAair_PM25_NC18_raw[order(EPAair_PM25_NC18_raw[,'Date'],-EPAair_PM25_NC18_raw[,'Site.ID']),]
+PM2.5 = EPAair_PM25_NC18_raw[!duplicated(EPAair_PM25_NC18_raw$Date),]
+
+Daily.Mean.PM2.5.Concentration = Daily.Mean.PM2.5.Concentration[order(Daily.Mean.PM2.5.Concentration[,'Date'],-Daily.Mean.PM2.5.Concentration[,'Site.ID']),],
+Daily.Mean.PM2.5.Concentration = Daily.Mean.PM2.5.Concentration[!duplicated(Daily.Mean.PM2.5.Concentration$Date),]
 ```
 
 3c. Determine the temporal autocorrelation in your model. 
@@ -130,6 +138,17 @@ Research question: Is there a trend in total N surface concentrations in Peter a
 4. Duplicate the Mann-Kendall test we ran for total P in class, this time with total N for both lakes. Make sure to run a test for changepoints in the datasets (and run a second one if a second change point is likely). 
 
 ```{r}
+# Run separate Mann-Kendall for each change point
+mk.test(Paul.nutrients.processed$tn_ug[1:15]) #z score is negative
+mk.test(Paul.nutrients.processed$tn_ug[16:99]) #z score is positive
+
+# Is there a second change point?
+pettitt.test(Paul.nutrients.processed$tn_ug[16:99])
+# 16 + 36 = 52
+
+# Run another Mann-Kendall for the second change point
+mk.test(Paul.nutrients.processed$tn_ug[16:51]) # z score negative
+mk.test(Paul.nutrients.processed$tn_ug[52:99]) # z score negative
 
 ```
 

@@ -1,6 +1,6 @@
 ---
 title: "Assignment: Spatial Analysis in R"
-author: "Student Name"
+author: "Kat Horan"
 output:
   html_document:
     toc: true
@@ -30,7 +30,11 @@ You should notice that the answer is highlighted in green by RStudio.
 ### 1. Prepare the workspace
 * Import: tidyverse, sf, and leaflet
 ```{r Prepare workspace}
+# setwd("/Users/kathleenhoran/Desktop/Duke/Spring 2019/Env. Data Analytics/Env_Data_Analytics")
 
+library(tidyverse)
+library(sf)
+library(leaflet)
 ```
 
 ### 2. Read filtered county features into an sf dataframe and plot
@@ -45,6 +49,8 @@ Nebraska's state FIPS code is `31` (as North Carolina's was `37`).
 * Plot the records as a map (in any format)
 ```{r Read the county data into an sf dataframe}
 #Read in Counties shapefile into an sf dataframe, filtering for just NC counties
+counties_NE_sf<- st_read('./Data/Spatial/cb_2017_us_county_20m.shp') %>% 
+  filter(STATEFP == 31)
 
 
 #Reveal the CRS of the counties features
