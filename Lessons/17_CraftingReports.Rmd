@@ -20,7 +20,7 @@ editor_options:
     + YAML templates include options for html, pdf, word, markdown, and interactive
     + More information on formatting the YAML header can be found in the cheat sheet
 2. **R Code Chunks** surrounded by ``` on top and bottom
-    + Create using `Cmd/Ctrl` + `Alt` + `I`
+    + Create using `Cmd/Ctrl` + `Alt` + `I` (option command i)
     + Can be named {r name} to facilitate navigation and autoreferencing
     + Chunk options allow for flexibility when the code runs and when the document is knitted
 3. **Text** with formatting options for readability in knitted document
@@ -35,10 +35,19 @@ A handy cheat sheet for R markdown can be found [here](https://www.rstudio.com/w
 
 Create a table below that details the example datasets we have been using in class. The first column should contain the name of the dataset and the second column should include some relevant information about the dataset.
 
-
+**Name**           | **Data Description**
+-------------------|-------------------------------
+EPA Air O3         | From NC 2017 & 2018
+EPA PM2.5          | From NC 2017 & 2018
+NTL-LTER Lakes     | Includes Nutrients & Chem
+  
 ## R CHUNK EDITING CHALLENGE
 ### Installing packages
 Create an R chunk below that installs the package `knitr`. Instead of commenting out the code, customize the chunk options such that the code is not evaluated (i.e., not run). 
+
+```{r, eval=FALSE}
+install.packages('knitr')
+```
 
 
 ### Setup
@@ -48,6 +57,29 @@ Load the NTL-LTER_Lake_Nutrients_Raw dataset, display the head of the dataset, a
 
 Customize the chunk options such that the code is run but is not displayed in the final document.
 
+```{r, Setup, include=FALSE}
+#Check working directory:
+getwd()
+
+#Load tidyverse & knitr
+require(tidyverse)
+require(knitr)
+
+#Set ggplot theme
+mytheme <- theme_classic(base_size = 14) +
+  theme(axis.text = element_text(color = "black"), 
+        legend.position = "top")
+theme_set(mytheme)
+
+#Load data & set date format
+Lakes.Nutrients.Raw<- read.csv("./Data/Raw/NTL-LTER_Lake_Nutrients_Raw.csv")
+
+Lakes.Nutrients.Raw$sampledate <- as.Date(Lakes.Nutrients.Raw$sampledate, 
+                                          format = "%Y-%m-%d")
+
+#Check head
+head(Lakes.Nutrients.Raw)
+```
 
 ### Data Exploration, Wrangling, and Visualization
 Create an R chunk below to create a processed dataset do the following operations: 
@@ -55,14 +87,41 @@ Create an R chunk below to create a processed dataset do the following operation
 * Include all columns except lakeid, depth_id, and comments
 * Include only surface samples (depth = 0 m)
 
+```{r, include=FALSE}
+Lakes.Nutrients.Surface <-
+  Lakes.Nutrients.Raw %>%
+  select(-lakeid, -depth_id, -comments) %>%
+  filter(depth == 0) %>%
+  filter(!is.na(tp_ug))
+```
 
 Create a second R chunk to create a summary dataset with the mean, minimum, maximum, and standard deviation of total nitrogen concentrations for each lake. Create a second summary dataset that is identical except that it evaluates total phosphorus. Customize the chunk options such that the code is run but not displayed in the final document. 
 
+```{r, include = FALSE}
+Lakes.Nutrients.Surface.TN_Sum <- 
+  Lakes.Nutrients.Raw %>%
+  summarise(meanTN = mean(tn_ug), 
+            minTN = min(tn_ug),
+            maxTN = max(tn_ug),
+            sdTN = sd(tn_ug))
+
+ Lakes.Nutrients.Surface.TP_Sum <- 
+  Lakes.Nutrients.Raw %>%
+  summarise(meanTP = mean(tp_ug), 
+            minTP = min(tp_ug),
+            maxTP = max(tp_ug),
+            sdTP = sd(tp_ug))
+```
 
 Create a third R chunk that uses the function `kable` in the knitr package to display two tables: one for the summary dataframe for total N and one for the summary dataframe of total P. Use the `caption = " "` code within that function to title your tables. Customize the chunk options such that the final table is displayed but not the code used to generate the table. 
 
+```{r, echo=FALSE}
+kable(Lakes.Nutrients.Surface.TN_Sum, caption = "Total Nitrogen Summary Table")
 
-Create a fourth and fifth R chunk that generates two plots (one in each chunk): one for total N over time with different colors for each lake, and one with the same setup but for total P. Decide which geom option will be appropriate for your purpose, and select a color palette that is visually pleasing and accessible. Customize the chunk options such that the final figures are displayed but not the code used to generate the figures. In addition, customize the chunk options such that the figures are aligned on the left side of the page. Lastly, add a fig.cap chunk option to add a caption (title) to your plot that will display underneath the figure.
+kable(Lakes.Nutrients.Surface.TP_Sum, caption = "Total Phosphorous Summary Table")
+```
+
+Create a fourth and fifth R chunk that generates two plots (one in each chunk): one for total N over time with different colors for each lake, and one with the same setup but for total P. Decide which geom option will be appropriate for your purpose, and select a color palette that is visually pleasing and accessible. Customize the chunk options such that the final figures are displayed but not the code used to generate the figures. < IGNORE: In addition, customize the chunk options such that the figures are aligned on the left side of the page. > Lastly, add a fig.cap chunk option to add a caption (title) to your plot that will display underneath the figure.
 
 
 ### Other options
