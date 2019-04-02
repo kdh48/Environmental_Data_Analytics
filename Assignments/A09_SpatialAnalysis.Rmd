@@ -1,12 +1,15 @@
 ---
-title: "Assignment: Spatial Analysis in R"
+title: 'Assignment: Spatial Analysis in R'
 author: "Kat Horan"
+geometry: margin=2.54cm
 output:
   html_document:
-    toc: true
+    theme: cosmo
+    toc: yes
     toc_depth: 2
-    theme: "cosmo"
-geometry: margin=2.54cm
+  pdf_document:
+    toc: yes
+    toc_depth: '2'
 editor_options:
   chunk_output_type: console
 ---
@@ -35,6 +38,15 @@ You should notice that the answer is highlighted in green by RStudio.
 library(tidyverse)
 library(sf)
 library(leaflet)
+library(mapview)
+library(viridis)
+
+
+#Set my theme
+mytheme <- theme_classic(base_size = 14) +
+  theme(axis.text = element_text(color = "black"),
+        legend.position = "top")
+theme_set(mytheme)
 ```
 
 ### 2. Read filtered county features into an sf dataframe and plot
@@ -52,15 +64,15 @@ Nebraska's state FIPS code is `31` (as North Carolina's was `37`).
 counties_NE_sf<- st_read('./Data/Spatial/cb_2017_us_county_20m.shp') %>% 
   filter(STATEFP == 31)
 
-
 #Reveal the CRS of the counties features
-
+st_crs(counties_NE_sf) 
 
 #Plot the data
+mapView(counties_NE_sf)
 
 ```
 > QUESTION: What is the EPSG code of the Counties dataset? Using http://spatialreference.org, is this a geographic or a projected coordinate system? (Or, does this CRS use angular or planar coordinate units?) To what datum is this CRS associated?  
-> ANSWER: 
+> ANSWER: The EPSG code of the Counties data set is 4269. This is a projected coordinate system associated with NAD83 datum.
 
 ### 3. Read in gage locations csv as a dataframe, then display the column names it contains
 Next we'll read in some USGS/NWIS gage location data I've added to the `Data/Raw` folder. These 
@@ -70,34 +82,38 @@ info on this datset.)
 * Display the column names of this dataset
 ```{r Read in USGS Gage Locations}
 #Read in gage locations csv as a dataframe
-
+gage_NWIS_NE<- read.csv('./Data/Raw/NWIS_SiteInfo_NE_RAW.csv')
 
 #Reveal the names of the columns
+names(gage_NWIS_NE)
 
 ```
 > QUESTION: What columns in the dataset contain the x and y coordinate values, respectively? 
-> ANSWER: 
+> ANSWER: "dec_long_va" contain the x coordinates and "dec_lat_va" contain the y coordinates!
 
 ### 4. Convert the gage locations dataframe to an sf dataframe of points
 * These data use the same coordnate reference system as the counties dataset
 * Display the column names of the resulting sf dataframe
 ```{r}
 #Convert to an sf object
-
+gage_NWIS_NE_sf <- st_as_sf(gage_NWIS_NE,coords = c('dec_long_va','dec_lat_va'),crs=4269)
 
 #Reveal the structure
+names(gage_NWIS_NE_sf)
 
 ```
-> QUESTION: What new field(s) appear in the sf dataframe created? What field(s), if any, disappeared?
-> ANSWER: 
+> QUESTION: What new field(s) appear in the sf dataframe created? What field(s), 
+if any, disappeared?
+> ANSWER: The fields "dec_lat_va" and "dec_long_va" disappeared and the field 
+"geometry" was added. 
 
 
 ### 5. Use `ggplot` to plot the gage locations on top of the counties
 * Plot the different datasets in different colors
 ```{r}
 ggplot() + 
-  geom_sf(data = sf_counties,col='red') + 
-  geom_sf(data = sf_gageloc,col='blue')
+  geom_sf(data = counties_NE_sf,col='red') + 
+  geom_sf(data = gage_NWIS_NE_sf,col='blue')
 ```
 
 
@@ -115,19 +131,18 @@ stream gage heights (in meters) recorded during the recent flood event. This fil
 * Once joined, we will again have to convert this product (a dataframe) into a spatial dataframe. Do that.
 ```{r}
 #Read in the data
-
+flow_NWIS_NE<- read.csv('./Data/Raw/NWIS_SiteFlowData_NE_RAW.csv')
 
 #Show the column names
-
+names(flow_NWIS_NE)
 
 #Join location data to it
-
+flow_gage_NWIS_join <- flow_NWIS_NE %>% 
+  inner_join(y = gage_NWIS_NE_sf,by = c("site_no" =  "site_no", "station_nm" = "station_nm"))
 
 #Convert back to sf dataframe
-
+flow_gage_NWIS_join_sf <- st_as_sf(flow_gage_NWIS_join)
 ```
-
-
 
 ### 7. Map the pattern of gage height data
 Now we can examine where the flooding appears most acute by visualizing gage heights spatially. 
@@ -135,7 +150,12 @@ Now we can examine where the flooding appears most acute by visualizing gage hei
  * Show the magnitude of gage height by color, shape, other visualization technique.
 ```{r}
 #Plot the values
-
+ggplot() + 
+  geom_sf(data = counties_NE_sf,col='dodgerblue3', fill='gray94') + 
+  geom_sf(data = flow_gage_NWIS_join_sf, aes(color=gage_ht)) + 
+  geom_point(shape = 21, size = 4, alpha = 0.8) +
+  labs(fill = "Gage Height", color = "Gage Height") +
+  scale_color_viridis(option = "magma", discrete = FALSE, direction = -1)
 ```
 
 ## SPATIAL ANALYSIS
@@ -147,12 +167,20 @@ transform our data into a projected coordinate system. We'll choose UTM Zone 14N
 * Using ggplot, plot the data so that each can be seen as different colors
 ```{r}
 #Transform the counties and gage location datasets to UTM Zone 14
+counties_NE_sf_UTM <- st_transform(counties_NE_sf, crs=32614)
+flow_gage_NWIS_join_sf_UTM <- st_transform(flow_gage_NWIS_join_sf, crs=32614)
 
 #Plot the data
+ggplot() + 
+  geom_sf(data = counties_NE_sf_UTM,col='dodgerblue3', fill='gray94') + 
+  geom_sf(data = flow_gage_NWIS_join_sf_UTM, aes(color=gage_ht)) + 
+  geom_point(shape = 21, size = 4, alpha = 0.8) +
+  labs(fill = "Gage Height", color = "Gage Height") +
+  scale_color_viridis(option = "magma", discrete = FALSE, direction = -1)
 
 ```
 > QUESTION: The shape of Nebraska should look a bit different than the one created in Step 5? Why?
-> ANSWER: 
+> ANSWER: The shape is more accurate now because it is in the UTM (transverse mercador) that is specific to Nebraska
 
 ### 9. Select the gages falling within a given county
 Now let's zoom into a particular county and examine the gages located there. 
@@ -166,10 +194,21 @@ Now let's zoom into a particular county and examine the gages located there.
  * and the gage sites in that county
 ```{r}
 #Select the county
+counties_NE_Lancaster_sf_UTM <- counties_NE_sf_UTM %>% 
+  filter(NAME == 'Lancaster')
 
 #Select gages within 
+Lancaster_gage_clip<- flow_gage_NWIS_join_sf_UTM[counties_NE_Lancaster_sf_UTM,]
 
 #Plot
+ggplot() + 
+  geom_sf(data = counties_NE_sf_UTM,col='dodgerblue3', fill='gray94') + 
+  geom_sf(data = counties_NE_Lancaster_sf_UTM,col='dodgerblue3', fill='gray60') +
+  geom_sf(data = Lancaster_gage_clip, aes(color=gage_ht)) + 
+  geom_point(shape = 21, size = 4, alpha = 0.8) +
+  labs(fill = "Gage Height", color = "Gage Height") +
+  scale_color_viridis(option = "magma", discrete = FALSE, direction = -1) +
+  theme(legend.position = "right")
 
 ```
 
@@ -186,10 +225,24 @@ attributes of the county in which it is located.
   * Display each gage size proportional to its "gage_ht" value
 ```{r Spatial Join}
 #Join features
+gage_counties_NE_sf_join <- st_join(flow_gage_NWIS_join_sf_UTM, counties_NE_sf_UTM) %>% 
+filter(!is.na(NAME)) 
+
+#One of these gages seems to have been assigned mistaken coordinates that are in NE, but 
+#the site no & name indicate that it is actually located in Iowa.
+#It doesn't have matching county information so I filtered it out.
+#Site no. 6486000 -- Missouri River at Sioux City, IA
 
 #Show column names
+names(gage_counties_NE_sf_join)
 
 #Plot
+ggplot() + 
+  geom_sf(data = counties_NE_sf_UTM,col='dodgerblue3', fill='gray94') + 
+  geom_sf(data = gage_counties_NE_sf_join, aes(size=gage_ht, color=NAME, fill=NAME)) +
+  labs(fill = "County Name", color = "County Name") +
+  guides(size = FALSE) +
+  theme(legend.position = "bottom")
 
 ```
 
@@ -205,12 +258,23 @@ it's mean gage height.
  * Not all counties will have data
 ```{r}
 #Group and summarize
+gage_counties_NE_groupsum <- gage_counties_NE_sf_join %>% 
+  group_by(NAME) %>% 
+  summarize(meanGH = mean(gage_ht))
 
 #Convert result to a simple dataframe
+gage_counties_NE_groupsum_df<- st_drop_geometry(gage_counties_NE_groupsum)
 
 #Join summary to County fc
+gage_counties_NE_groupsum_join <- counties_NE_sf_UTM %>% 
+  left_join(y = gage_counties_NE_groupsum_df,by = c("NAME" = "NAME"))
 
 #Plot
-
+ggplot() + 
+  geom_sf(data = counties_NE_sf_UTM, col='dodgerblue3', fill='gray94') + 
+  geom_sf(data = gage_counties_NE_groupsum_join, aes(size=meanGH, color=NAME, fill=NAME)) +
+  labs(fill = "County Name", color = "County Name") +
+  guides(size = FALSE) +
+  theme(legend.position = "bottom")
 ```
 
