@@ -3,7 +3,7 @@ library(ggplot2)
 
 
 # ui
-ui <- fluidPage(
+ui <- fluidPage( # almost always start with this so it is interactive
    
    # title
    titlePanel('normal distribution'),
@@ -42,9 +42,10 @@ ui <- fluidPage(
 )
 
 # server
-server <- function(input, output) {
+server <- function(input, output) { #always start with this
    
    output$dist <- renderPlot({ # adjust the number of bins based on the sample size
+     # this says if we have less than a 25 sample size, just give 10 bins. if sample size less than 50, 20 bins, etc.
      
      n <- input$n
      if(n < 25){
